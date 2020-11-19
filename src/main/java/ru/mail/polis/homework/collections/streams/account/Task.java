@@ -1,5 +1,6 @@
 package ru.mail.polis.homework.collections.streams.account;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Comparator;
 import java.util.List;
@@ -10,11 +11,9 @@ public class Task {
      * Метод должен вернуть сумму всех исходящих транзакций с аккаунта
      * 2 балла
      */
-    public static long paymentsSumByAccount(Account account) {
-        return account.getTransactions().stream()
-        .filter(transaction -> transaction.getRecipientId() != account.getId())
-        .mapToLong(Transaction::getSum)
-        .sum();
+    public static Map<Long, Long> paymentsSumByAccount(List<Transaction> transactions) {
+        return transactions.stream()
+                .collect(Collectors.groupingBy(Transaction::getRecipientId, Collectors.summingLong(Transaction::getSum)));
     }
 
     /**
@@ -39,12 +38,12 @@ public class Task {
      * (обойтись без циклов и условий)
      * 3 балла
      */
-    public static List<String> paymentsSumByAccount(List<Account> accounts, long t, int n) {
+    public static List<Integer> paymentsSumByAccount(List<Account> accounts, long t, int n) {
         return accounts.stream()
-                .sorted(Comparator.comparing(account -> account.getBalanceByDate(t)))
-                .skip(1)                
+                .sorted(Comparator.comparing((Account account) -> account.getBalanceByDate(t)).reversed())
+                .map(Account::getId)
+                .skip(1)
                 .limit(n)
-                .map(account -> String.valueOf(account.getId()))
                 .collect(Collectors.toList());
     }
 }
