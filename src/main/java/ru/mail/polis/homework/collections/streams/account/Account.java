@@ -1,6 +1,7 @@
 package ru.mail.polis.homework.collections.streams.account;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class Account {
     }
 
     public List<Transaction> getTransactions() {
-        return transactions;
+        return Collections.unmodifiableList(transactions);
     }
 
     public void addTransaction(Transaction transaction) {
