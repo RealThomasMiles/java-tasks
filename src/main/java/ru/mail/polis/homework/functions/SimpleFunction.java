@@ -6,7 +6,6 @@ import java.util.function.Function;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,11 +19,6 @@ public class SimpleFunction {
     interface TerFunction<T, U, S, R> {
         
         R apply(T t, U u, S s);
-
-        default <V> TerFunction<T, U, S, V> andThen(Function<? super R, ? extends V> after) {
-            Objects.requireNonNull(after);
-            return (T t, U u, S s) -> after.apply(apply(t, u, s));
-        }
     }
 
     /**
@@ -45,10 +39,13 @@ public class SimpleFunction {
      * 4 балла
      */
     public static final Function<List<IntUnaryOperator>, UnaryOperator<List<Integer>>> multifunctionalMapper =
-        operators -> numbers -> numbers.stream()
-        .map(number -> operators.stream()
-            .reduce(x -> x, (op1, op2) -> x -> op2.applyAsInt(op1.applyAsInt(x))).applyAsInt(number))
-        .collect(Collectors.toList());
+            operatorsList -> numbers -> numbers.stream()
+                    .flatMap(number -> IntStream.range(0, operatorsList.size())
+                                    .mapToObj(i -> operatorsList.subList(0, i))
+                            .map(subListOperators -> subListOperators.stream()
+                                    .reduce(IntUnaryOperator.identity(), IntUnaryOperator::andThen))
+                            .map(operator -> operator.applyAsInt(number)))
+                    .collect(Collectors.toList());
 
 
     /**
