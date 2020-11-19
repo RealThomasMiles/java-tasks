@@ -17,8 +17,11 @@ public class SimpleStreams {
      * 1 балл
      */
     public static boolean isPrime(int n) {
+        if (n < 2) {
+            return false;
+        }
         return IntStream.rangeClosed(2, (int)Math.sqrt(n))
-        .noneMatch(i -> n % i == 0);
+                .noneMatch(i -> n % i == 0);
     }
 
     /**
@@ -29,9 +32,7 @@ public class SimpleStreams {
     public static Map<String, Integer> createBadWordsDetectingStream(String text, List<String> badWords) {
         return Arrays.stream(text.split("[\n .,;:!?]"))
                 .filter(badWords::contains)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                .entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, wordMentions -> wordMentions.getValue().intValue()));
+                .collect(Collectors.toMap(Function.identity(), word -> 1, Integer::sum));
     }
 
 
@@ -47,12 +48,13 @@ public class SimpleStreams {
      * 3 балла
      */
 
-    public static final double G = 9.8;
+    public static final double g = 9.8;
     
     public static double calcDistance(double v, DoubleUnaryOperator changeV, double alpha, int n) {
         final double sin = Math.sin(alpha * 2);
         return DoubleStream.iterate(v, changeV)
-            .limit(n)
-            .reduce(0, (sum, value) -> sum + value * value * sin / G);
+                .limit(n)
+                .map(velocity -> velocity * velocity * sin / g)
+                .sum();
     }
 }
